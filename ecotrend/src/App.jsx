@@ -9,9 +9,20 @@ export default function App() {
   const [filters, setFilters] = useState({ category: "all", price: 5000 });
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  const [loading, setLoading] = useState(true); // loading produtos
-  const [checkoutLoading, setCheckoutLoading] = useState(false); // loading checkout
+  // Modal produto
+  const [selectedProduct, setSelectedProduct] = useState(null);
+
+  // Checkout
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [checkoutData, setCheckoutData] = useState({
+    name: "",
+    address: "",
+    payment: "pix",
+    installments: 1,
+  });
+  const [finalTotal, setFinalTotal] = useState(0);
 
   // Carrega JSON de produtos
   useEffect(() => {
@@ -40,6 +51,7 @@ export default function App() {
       }
       return [...prev, { ...product, qty: 1 }];
     });
+    setSelectedProduct(null);
   };
 
   const removeFromCart = (id) => {
@@ -51,18 +63,25 @@ export default function App() {
   // Aplica filtros
   const filtered = products.filter(
     (p) =>
-      (filters.category === "all" || p.category === filters.category) &&
+      (filters.category === "all" || p.category === filters.category) && // <--- CORREÇÃO AQUI
       p.price <= filters.price
   );
 
   // Checkout simulado
-  const checkout = async () => {
+  const checkout = async (e) => {
+    e.preventDefault();
+    if (!checkoutData.name || !checkoutData.address) {
+      setMessage("Preencha todos os campos do checkout!");
+      return;
+    }
     setCheckoutLoading(true);
     setMessage("Processando...");
     try {
-      await new Promise((res) => setTimeout(res, 1500)); // simula API
+      await new Promise((res) => setTimeout(res, 1500));
       setMessage("Compra realizada com sucesso!");
+      setFinalTotal(total);
       setCart([]);
+      setCheckoutData({ ...checkoutData, name: "", address: "", payment: "pix", installments: 1 });
     } catch {
       setMessage("Erro ao processar compra.");
     } finally {
@@ -74,7 +93,7 @@ export default function App() {
     <div>
       <header>
         <h1>EcoTrend</h1>
-        <button onClick={() => setSidebarOpen(true)}>🛒 Carrinho</button>
+        <button onClick={() => setSidebarOpen(true)}>🛒 Carrinho ({cart.length})</button>
       </header>
 
       {/* Filtros */}
@@ -107,7 +126,7 @@ export default function App() {
               setFilters((f) => ({ ...f, price: Number(e.target.value) }))
             }
           />
-          <span>{filters.price}</span>
+          <span>R$ {filters.price}</span>
         </label>
       </section>
 
@@ -119,38 +138,147 @@ export default function App() {
           </div>
         ) : (
           filtered.map((p) => (
-  <div className="product" key={p.id}>
-    <img 
-      src={p.image} 
-      alt={p.name} 
-      style={{ width: "100%", maxHeight: "150px", objectFit: "cover", borderRadius: "8px" }}
-    />
-    <h3>{p.name}</h3>
-    <p>{p.category}</p>
-    <p>R$ {p.price.toFixed(2)}</p>
-    <button onClick={() => addToCart(p)}>Adicionar</button>
-  </div>
-))
+            <div className="product" key={p.id}>
+              <img
+                src={p.image}
+                alt={p.name}
+                style={{
+                  width: "100%",
+                  maxHeight: "150px",
+                  objectFit: "contain",
+                  borderRadius: "8px",
+                }}
+                onClick={() => setSelectedProduct(p)}
+              />
+              <h3>{p.name}</h3>
+              <p>{p.category}</p>
+              <p>R$ {p.price.toFixed(2)}</p>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  addToCart(p);
+                }}
+              >
+                Comprar
+              </button>
+            </div>
+          ))
         )}
       </main>
+
+      {/* Modal do produto */}
+      {selectedProduct && (
+        <div className="modal-overlay" onClick={() => setSelectedProduct(null)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <img
+              src={selectedProduct.image}
+              alt={selectedProduct.name}
+              style={{
+                width: "100%",
+                maxHeight: "200px",
+                objectFit: "contain",
+                borderRadius: "8px",
+                marginBottom: "1rem",
+              }}
+            />
+            <h3>{selectedProduct.name}</h3>
+            <p>{selectedProduct.category}</p>
+            <p style={{ marginBottom: "1rem" }}>
+              R$ {selectedProduct.price.toFixed(2)}
+            </p>
+            <button onClick={() => addToCart(selectedProduct)}>
+              Adicionar ao Carrinho
+            </button>
+            <br />
+            <button
+              style={{ marginTop: "0.5rem", background: "#8d6e63" }}
+              onClick={() => setSelectedProduct(null)}
+            >
+              Fechar
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Sidebar do carrinho */}
       <aside className={`cartSidebar ${sidebarOpen ? "show" : ""}`}>
         <button onClick={() => setSidebarOpen(false)}>X</button>
         <h2>Seu Carrinho</h2>
+        {cart.length === 0 && message === "Compra realizada com sucesso!" ? (
+          <p>Total: R$ {finalTotal.toFixed(2)}</p>
+        ) : (
+          <p>Total: R$ {total.toFixed(2)}</p>
+        )}
         <ul>
           {cart.map((item) => (
-            <li key={item.id}>
-              {item.name} ({item.qty}x) - R${" "}
-              {(item.price * item.qty).toFixed(2)}
+            <li key={item.id} className="cart-item">
+              <img src={item.image} alt={item.name} className="cart-thumb" />
+              <div className="cart-info">
+                <strong>{item.name}</strong>
+                <span>{item.qty}x • R$ {(item.price * item.qty).toFixed(2)}</span>
+              </div>
               <button onClick={() => removeFromCart(item.id)}>Remover</button>
             </li>
           ))}
         </ul>
-        <p>Total: R$ {total.toFixed(2)}</p>
-        <button onClick={checkout} disabled={checkoutLoading}>
-          {checkoutLoading ? "Finalizando..." : "Finalizar Compra"}
-        </button>
+
+        {/* Form de checkout */}
+        {cart.length > 0 && (
+          <form className="checkout-form" onSubmit={checkout}>
+            <input
+              type="text"
+              placeholder="Seu nome"
+              value={checkoutData.name}
+              onChange={(e) =>
+                setCheckoutData({ ...checkoutData, name: e.target.value })
+              }
+              required
+            />
+            <input
+              type="text"
+              placeholder="Endereço de entrega"
+              value={checkoutData.address}
+              onChange={(e) =>
+                setCheckoutData({ ...checkoutData, address: e.target.value })
+              }
+              required
+            />
+            <select
+              value={checkoutData.payment}
+              onChange={(e) =>
+                setCheckoutData({ ...checkoutData, payment: e.target.value })
+              }
+            >
+              <option value="pix">PIX</option>
+              <option value="cartao">Cartão de Crédito</option>
+              <option value="boleto">Boleto</option>
+            </select>
+            
+            {/* Lógica de parcelamento */}
+            {checkoutData.payment === "cartao" && total > 200 && (
+              <select
+                value={checkoutData.installments}
+                onChange={(e) =>
+                  setCheckoutData({
+                    ...checkoutData,
+                    installments: Number(e.target.value),
+                  })
+                }
+              >
+                <option value={1}>1x de R$ {total.toFixed(2)}</option>
+                <option value={2}>2x de R$ {(total / 2).toFixed(2)}</option>
+                <option value={3}>3x de R$ {(total / 3).toFixed(2)}</option>
+                <option value={4}>4x de R$ {(total / 4).toFixed(2)}</option>
+                <option value={5}>5x de R$ {(total / 5).toFixed(2)}</option>
+              </select>
+            )}
+
+            <button type="submit" disabled={checkoutLoading}>
+              {checkoutLoading ? "Finalizando..." : "Finalizar Compra"}
+            </button>
+          </form>
+        )}
+
         <p>{message}</p>
       </aside>
     </div>
