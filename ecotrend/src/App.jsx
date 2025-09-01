@@ -6,7 +6,7 @@ export default function App() {
   const [cart, setCart] = useState(() =>
     JSON.parse(localStorage.getItem("eco_cart")) || []
   );
-  const [filters, setFilters] = useState({ category: "all", price: 500 });
+  const [filters, setFilters] = useState({ category: "all", price: 5000 });
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [message, setMessage] = useState("");
 
@@ -101,7 +101,7 @@ export default function App() {
           <input
             type="range"
             min="0"
-            max="500"
+            max="5000"
             value={filters.price}
             onChange={(e) =>
               setFilters((f) => ({ ...f, price: Number(e.target.value) }))
