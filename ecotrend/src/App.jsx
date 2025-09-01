@@ -119,13 +119,18 @@ export default function App() {
           </div>
         ) : (
           filtered.map((p) => (
-            <div className="product" key={p.id}>
-              <h3>{p.name}</h3>
-              <p>{p.category}</p>
-              <p>R$ {p.price.toFixed(2)}</p>
-              <button onClick={() => addToCart(p)}>Adicionar</button>
-            </div>
-          ))
+  <div className="product" key={p.id}>
+    <img 
+      src={p.image} 
+      alt={p.name} 
+      style={{ width: "100%", maxHeight: "150px", objectFit: "cover", borderRadius: "8px" }}
+    />
+    <h3>{p.name}</h3>
+    <p>{p.category}</p>
+    <p>R$ {p.price.toFixed(2)}</p>
+    <button onClick={() => addToCart(p)}>Adicionar</button>
+  </div>
+))
         )}
       </main>
 
@@ -136,7 +141,7 @@ export default function App() {
         <ul>
           {cart.map((item) => (
             <li key={item.id}>
-              {item.name} (x{item.qty}) - R${" "}
+              {item.name} ({item.qty}x) - R${" "}
               {(item.price * item.qty).toFixed(2)}
               <button onClick={() => removeFromCart(item.id)}>Remover</button>
             </li>
