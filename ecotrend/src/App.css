@@ -6,7 +6,7 @@
 }
 
 html, body, #root {
-  height: 100%;
+  min-height: 100vh;
   width: 100%;
 }
 
@@ -17,6 +17,7 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  overflow-x: hidden; /* Impede scroll lateral com zoom */
 }
 
 /* HEADER */
@@ -83,22 +84,13 @@ header button:hover {
   max-width: 1200px;
   margin: 0 auto;
   display: grid;
-  /* Use um padding maior para dar mais respiro nas laterais */
-  padding: 2.5rem; 
-  /* Adicione uma margin negativa para que os gaps não se acumulem nas bordas */
-  margin: -0.75rem auto 0 auto; 
-  
-  /* Ajuste para auto-fit em vez de auto-fill, que é mais flexível */
-  /* Diminua o minmax para 220px para caber mais itens em telas menores */
+  padding: 2.5rem;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  
-  /* Use o gap para definir o espaçamento entre os cards */
-  gap: 1.5rem; 
+  gap: 1.5rem;
   box-sizing: border-box;
 }
 
 .product {
-  /* ... (O restante do código do .product permanece o mesmo) ... */
   background: white;
   border-radius: 12px;
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
