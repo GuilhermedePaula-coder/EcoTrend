@@ -26,7 +26,9 @@ export default function App() {
 
   // Carrega JSON de produtos
   useEffect(() => {
-    fetch("/products.json")
+    // Substitua a URL abaixo pela URL do seu arquivo JSON no GitHub Pages
+    // Exemplo: 'https://seunome.github.io/seu-repositorio/products.json'
+    fetch("https://raw.githubusercontent.com/EnzoFerreira-lab/produtos/refs/heads/main/produtos.json")
       .then((res) => res.json())
       .then((data) => {
         setProducts(data);
@@ -63,13 +65,20 @@ export default function App() {
   // Aplica filtros
   const filtered = products.filter(
     (p) =>
-      (filters.category === "all" || p.category === filters.category) && // <--- CORREÇÃO AQUI
+      (filters.category === "all" || p.category === filters.category) &&
       p.price <= filters.price
   );
 
   // Checkout simulado
   const checkout = async (e) => {
     e.preventDefault();
+
+    // Adiciona uma verificação para o carrinho vazio
+    if (cart.length === 0) {
+      setMessage("O carrinho está vazio. Adicione produtos para continuar.");
+      return; // Interrompe a função aqui
+    }
+
     if (!checkoutData.name || !checkoutData.address) {
       setMessage("Preencha todos os campos do checkout!");
       return;
@@ -210,6 +219,7 @@ export default function App() {
           <p>Total: R$ {total.toFixed(2)}</p>
         )}
         <ul>
+          {/* Se o carrinho estiver vazio, esta lista ficará vazia */}
           {cart.map((item) => (
             <li key={item.id} className="cart-item">
               <img src={item.image} alt={item.name} className="cart-thumb" />
@@ -222,9 +232,8 @@ export default function App() {
           ))}
         </ul>
 
-        {/* Form de checkout */}
-        {cart.length > 0 && (
-          <form className="checkout-form" onSubmit={checkout}>
+        {/* O formulário agora é sempre visível */}
+        <form className="checkout-form" onSubmit={checkout}>
             <input
               type="text"
               placeholder="Seu nome"
@@ -277,7 +286,6 @@ export default function App() {
               {checkoutLoading ? "Finalizando..." : "Finalizar Compra"}
             </button>
           </form>
-        )}
 
         <p>{message}</p>
       </aside>
