@@ -1,0 +1,8 @@
+[
+  { "id": 1, "name": "Camiseta Orgânica EcoFit", "category": "Roupas", "price": 89.90 },
+  { "id": 2, "name": "Escova de Bambu", "category": "Beleza", "price": 19.90 },
+  { "id": 3, "name": "Garrafa Inox Reutilizável", "category": "Casa", "price": 59.90 },
+  { "id": 4, "name": "Painel Solar Portátil", "category": "Tecnologia", "price": 449.00 },
+  { "id": 5, "name": "Sabonete Natural Vegano", "category": "Beleza", "price": 14.50 },
+  { "id": 6, "name": "Tênis Sustentável GreenStep", "category": "Roupas", "price": 299.00 }
+]
